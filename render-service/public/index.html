@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maruti Dashboard Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --accent-glow: rgba(16, 185, 129, 0.25);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #10b981, #047857);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: white;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .status-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    .status-dot.warning { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+    .status-dot.danger { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+    .main-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    .steps-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      background: var(--bg-card);
+      padding: 0.5rem;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      gap: 0.5rem;
+    }
+
+    .step-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .step-item.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      display: none;
+    }
+
+    .step-card.active {
+      display: block;
+    }
+
+    .card-header {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .qr-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: rgba(15, 23, 42, 0.4);
+      border-radius: 14px;
+      border: 2px dashed var(--border-color);
+    }
+
+    .qr-box {
+      width: 260px;
+      height: 260px;
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .qr-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(16, 185, 129, 0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .search-box {
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 0.3rem;
+    }
+
+    .group-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .group-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .group-card.selected {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.12);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .group-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .group-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .group-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.2rem;
+    }
+
+    .group-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .badge-active {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      background: var(--accent);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 10px;
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .dash-grid { grid-template-columns: 1fr; }
+    }
+
+    .dash-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .dash-box-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .otp-display {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 4px;
+      color: var(--accent);
+      text-align: center;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 10px;
+      border: 1px dashed var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: rgba(51, 65, 85, 0.6);
+      color: white;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .log-output {
+      background: #090d16;
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: 1.5rem;
+      border: 1px solid #1e293b;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">M</div>
+      <div class="brand-title">Maruti Dashboard Automation</div>
+    </div>
+    <div class="status-badge">
+      <div class="status-dot" id="headerDot"></div>
+      <span id="headerStatusText">Connecting...</span>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <div class="steps-nav">
+      <div class="step-item active" id="navStep1" onclick="switchStep(1)">
+        <div class="step-number">1</div>
+        <span>Scan QR Code</span>
+      </div>
+      <div class="step-item" id="navStep2" onclick="switchStep(2)">
+        <div class="step-number">2</div>
+        <span>Select Group</span>
+      </div>
+      <div class="step-item" id="navStep3" onclick="switchStep(3)">
+        <div class="step-number">3</div>
+        <span>Dashboard</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Scan QR -->
+    <div class="step-card active" id="cardStep1">
+      <div class="card-header">
+        <h2 class="card-title">Link WhatsApp Account</h2>
+        <p class="card-desc">Scan this QR code using WhatsApp on your phone to link device</p>
+      </div>
+
+      <div class="qr-wrapper">
+        <div class="qr-box" id="qrContainer">
+          <div class="qr-loading" id="qrLoading">
+            <div class="spinner"></div>
+            <span>Generating QR Code...</span>
+          </div>
+          <img src="/qr.png" id="qrImg" alt="WhatsApp QR Code" style="display:none;" />
+        </div>
+        <p style="margin-top: 1.25rem; color: var(--text-muted); font-size: 0.9rem; text-align: center;">
+          Open WhatsApp &gt; Settings / Menu &gt; Linked Devices &gt; <strong>Link a Device</strong>
+        </p>
+        <div id="qrConnectedNote" style="display:none; margin-top: 1rem; text-align: center;">
+          <p style="color: var(--accent); font-weight: 600;">✅ WhatsApp is already connected!</p>
+          <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.5rem;">
+            <button class="btn btn-primary" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="switchStep(2)">Select Group ➔</button>
+            <button class="btn btn-secondary" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="handleLogout()">Re-scan New QR</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Select Group -->
+    <div class="step-card" id="cardStep2">
+      <div class="card-header">
+        <h2 class="card-title">Select WhatsApp Group</h2>
+        <p class="card-desc">Choose the group where Maruti OTP messages are received</p>
+      </div>
+
+      <div id="alreadyConnectedBanner" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; justify-content: space-between; align-items: center; gap: 1rem;">
+        <span style="font-size: 0.9rem;">✅ <strong>WhatsApp Connected &amp; Ready!</strong> Select group below.</span>
+        <button class="btn btn-secondary" style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.8rem; white-space: nowrap;" onclick="handleLogout()">📱 Switch Account / Re-scan</button>
+      </div>
+
+      <!-- Dropdown Group Selector -->
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label class="form-label" style="font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+          <span>📋 Select WhatsApp Group:</span>
+        </label>
+        <select class="form-control" id="groupDropdown" onchange="onDropdownSelect(this.value)" style="font-size: 1rem; padding: 0.85rem; background: #0f172a; color: white; border: 1.5px solid var(--accent); border-radius: 10px; cursor: pointer; width: 100%;">
+          <option value="">-- Loading WhatsApp Groups... --</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+        <button class="btn btn-secondary" onclick="fetchGroups()">🔄 Refresh Groups</button>
+        <button class="btn btn-primary" id="btnConfirmGroup" onclick="switchStep(3)" disabled>Proceed to Dashboard ➔</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Dashboard & Automation -->
+    <div class="step-card" id="cardStep3">
+      <div class="card-header" style="text-align: left; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 class="card-title">Automation Control Center</h2>
+          <p class="card-desc">Active Group: <strong id="activeGroupNameText" style="color: var(--accent);">None Selected</strong></p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <span id="scheduledTimeDisplay" style="display: none; background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: bold;"></span>
+          <button class="btn btn-primary" id="btnSchedule" style="width: auto; padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="document.getElementById('scheduleModal').style.display = 'flex'">⏰ Schedule Run</button>
+          <button class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="switchStep(2)">⚙️ Change Group</button>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- OTP Box -->
+        <div class="dash-box">
+          <div class="dash-box-title">💬 Live OTP Monitor</div>
+          <div class="otp-display" id="otpDisplay">------</div>
+          <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" id="otpMeta">No OTP received yet</p>
+          
+          <div class="form-group">
+            <label class="form-label">Manual OTP Override (Test Mode)</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" class="form-control" id="manualOtpInput" placeholder="Enter 6-digit OTP">
+              <button class="btn btn-secondary" style="width: auto;" onclick="setManualOtp()">Set</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Form -->
+        <div class="dash-box">
+          <div class="dash-box-title">📊 Maruti Report Fetcher</div>
+          <form id="reportForm" onsubmit="handleFetchReport(event)">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label">Maruti Username / Email</label>
+                <input type="text" class="form-control" id="marutiUsername" placeholder="e.g. user@appdashboard.com" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Maruti Password</label>
+                <input type="password" class="form-control" id="marutiPassword" placeholder="Enter password" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Report Type</label>
+              <select class="form-control" id="reportType">
+                <option value="party-visit">Party Visit Report</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btnFetchReport">
+              🚀 Fetch &amp; Process Report
+            </button>
+          </form>
+        </div>
+
+        <!-- Google Sheet & Data Patch Box -->
+        <div class="dash-box" style="grid-column: 1 / -1; margin-top: 1rem;">
+          <div class="dash-box-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>📈 Google Sheets Data Integration</span>
+            <span id="sheetSyncBadge" class="status-badge" style="font-size: 0.75rem; background: rgba(16,185,129,0.1); color: var(--accent); border-color: var(--accent);">Ready</span>
+          </div>
+
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+            <div style="flex: 1; min-width: 280px;">
+              <label class="form-label">Google Sheet Webhook URL (Apps Script Web App)</label>
+              <input type="text" class="form-control" id="sheetWebhookInput" placeholder="https://script.google.com/macros/s/.../exec">
+            </div>
+            <button class="btn btn-secondary" style="width: auto; height: 42px;" onclick="saveSheetWebhook()">💾 Save Webhook</button>
+            <button class="btn btn-primary" id="btnSendToSheet" style="width: auto; height: 42px; background: #059669;" onclick="handleSendToSheet()" disabled>📊 Send Data to Google Sheet</button>
+            <button class="btn btn-secondary" id="btnExportCsv" style="width: auto; height: 42px;" onclick="exportToCsv()" disabled>📥 Export CSV</button>
+          </div>
+
+          <!-- Data Preview Container -->
+          <div id="dataPreviewSection" style="display: none; margin-top: 1rem; background: #0f172a; border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);" id="previewHeader">Fetched Data Preview (0 rows)</h4>
+              <span id="previewDateRange" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+            </div>
+            <div style="max-height: 250px; overflow: auto; border: 1px solid #334155; border-radius: 6px;">
+              <table id="previewTable" style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                <thead id="previewTableHead" style="background: #1e293b; position: sticky; top: 0; color: #10b981;"></thead>
+                <tbody id="previewTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-output" id="logConsole">System initialized. Ready for automation.</div>
+    </div>
+  </div>
+
+  <script>
+    var currentStep = 1;
+    var allGroups = [];
+    var activeGroupId = '';
+    var autoAdvanced = false;
+
+    // QR image load/error handlers
+    var qrImg = document.getElementById('qrImg');
+    if (qrImg) {
+      qrImg.onload = function() {
+        var l = document.getElementById('qrLoading');
+        if (l) l.style.display = 'none';
+        this.style.display = 'block';
+      };
+      qrImg.onerror = function() {
+        var l = document.getElementById('qrLoading');
+        if (l) l.style.display = 'flex';
+        this.style.display = 'none';
+      };
+    }
+
+    try {
+      var now = new Date();
+      var yyyy = now.getFullYear();
+      var mm = String(now.getMonth() + 1).padStart(2, '0');
+      var firstDay = yyyy + '-' + mm + '-01';
+      var today = yyyy + '-' + mm + '-' + String(now.getDate()).padStart(2, '0');
+      
+      var startEl = document.getElementById('startDate');
+      var endEl = document.getElementById('endDate');
+      if (startEl) startEl.value = firstDay;
+      if (endEl) endEl.value = today;
+    } catch (e) {
+      console.error('Initialization error:', e);
+    }
+
+    function logMsg(msg) {
+      var consoleEl = document.getElementById('logConsole');
+      if (!consoleEl) return;
+      var time = new Date().toLocaleTimeString();
+      consoleEl.innerText = '[' + time + '] ' + msg + '\n' + consoleEl.innerText;
+    }
+
+    function updateStatusUI(status, ready, qrAvailable) {
+      var dot = document.getElementById('headerDot');
+      var text = document.getElementById('headerStatusText');
+
+      if (!dot || !text) return;
+      dot.className = 'status-dot';
+      var banner = document.getElementById('alreadyConnectedBanner');
+      var note = document.getElementById('qrConnectedNote');
+
+      if (ready) {
+        dot.classList.add('active');
+        text.innerText = 'WhatsApp Connected';
+        if (banner) banner.style.display = 'flex';
+        if (note) note.style.display = 'block';
+      } else if (status === 'authenticated') {
+        dot.classList.add('warning');
+        text.innerText = 'Authenticated (Syncing...)';
+        if (banner) banner.style.display = 'flex';
+        if (note) note.style.display = 'block';
+      } else if (qrAvailable || status === 'qr_ready') {
+        dot.classList.add('warning');
+        text.innerText = 'Scan QR Code';
+        if (banner) banner.style.display = 'none';
+        if (note) note.style.display = 'none';
+      } else if (status === 'initializing') {
+        dot.classList.add('warning');
+        text.innerText = 'Initializing...';
+        if (banner) banner.style.display = 'none';
+        if (note) note.style.display = 'none';
+      } else {
+        dot.classList.add('danger');
+        text.innerText = status || 'Disconnected';
+        if (banner) banner.style.display = 'none';
+        if (note) note.style.display = 'none';
+      }
+    }
+
+    let lastSeenLogId = 0;
+    
+    async function pollStatus() {
+      try {
+        var res = await fetch('/api/status');
+        var data = await res.json();
+        updateStatusUI(data.whatsapp, data.ready, data.qrAvailable);
+        
+        if (data.activeGroupId) {
+          activeGroupId = data.activeGroupId;
+          var btnConfirmEl = document.getElementById('btnConfirmGroup');
+          if (btnConfirmEl) btnConfirmEl.disabled = false;
+        }
+
+        if (data.marutiUsername) {
+          var userEl = document.getElementById('marutiUsername');
+          if (userEl && !userEl.value) userEl.value = data.marutiUsername;
+        }
+
+        if (data.marutiPassword) {
+          var passEl = document.getElementById('marutiPassword');
+          if (passEl && !passEl.value) passEl.value = data.marutiPassword;
+        }
+
+        if (data.logs && data.logs.length > 0) {
+          data.logs.forEach(function(logObj) {
+            if (logObj.id > lastSeenLogId) {
+              logMsg(logObj.msg);
+              lastSeenLogId = logObj.id;
+            }
+          });
+        }
+
+        if (data.lastOtp) {
+          var otpEl = document.getElementById('otpDisplay');
+          var metaEl = document.getElementById('otpMeta');
+          if (otpEl) otpEl.innerText = data.lastOtp;
+          if (metaEl) metaEl.innerText = 'Received ' + (data.lastOtpAge ? data.lastOtpAge + 's ago' : 'recently');
+        }
+
+        if (data.ready || data.whatsapp === 'authenticated') {
+          if (!autoAdvanced && currentStep === 1) {
+            autoAdvanced = true;
+            logMsg('WhatsApp authenticated & syncing! Loading groups...');
+            switchStep(2);
+          }
+        } else if (data.qrAvailable || data.whatsapp === 'qr_ready') {
+          if (currentStep === 1) {
+            var img = document.getElementById('qrImg');
+            if (img && (img.style.display === 'none' || !img.src || img.src === window.location.href)) {
+              img.src = '/qr.png?t=' + Date.now();
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Status poll error:', e);
+      }
+    }
+
+    async function fetchGroups() {
+      var dropdown = document.getElementById('groupDropdown');
+      var btnConfirmEl = document.getElementById('btnConfirmGroup');
+      if (activeGroupId && btnConfirmEl) btnConfirmEl.disabled = false;
+
+      if (dropdown && (!allGroups || allGroups.length === 0)) {
+        dropdown.innerHTML = '<option value="">-- Syncing WhatsApp Groups... --</option>';
+      }
+
+      try {
+        var res = await fetch('/api/groups');
+        var data = await res.json();
+
+        if (res.ok && data.groups && data.groups.length > 0) {
+          allGroups = data.groups;
+          renderGroups(allGroups);
+        } else if (data.groups && data.groups.length === 0) {
+          allGroups = [];
+          renderGroups([]);
+        }
+      } catch (e) {
+        if (container) container.innerHTML = '<div style="grid-column: 1 / -1; color: var(--danger); text-align: center; padding: 1rem;">⚠️ Error connecting to server: ' + escapeHtml(e.message) + '</div>';
+        if (dropdown) dropdown.innerHTML = '<option value="">⚠️ Server Connection Error</option>';
+      }
+    }
+
+    function renderGroups(groups) {
+      var dropdown = document.getElementById('groupDropdown');
+      var container = document.getElementById('groupsList');
+
+      if (dropdown) {
+        if (!groups || groups.length === 0) {
+          dropdown.innerHTML = '<option value="">-- No WhatsApp Groups Found --</option>';
+        } else {
+          var optionsHtml = '<option value="">-- Select a WhatsApp Group (' + groups.length + ' Available) --</option>';
+          optionsHtml += groups.map(function(g) {
+            var selectedAttr = g.id === activeGroupId ? ' selected' : '';
+            return '<option value="' + escapeHtml(g.id) + '"' + selectedAttr + '>' + escapeHtml(g.name) + (g.participantCount ? ' (' + g.participantCount + ' members)' : '') + '</option>';
+          }).join('');
+          dropdown.innerHTML = optionsHtml;
+        }
+      }
+
+      if (!container) return;
+      if (!groups || groups.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 1.5rem; background: rgba(15, 23, 42, 0.4); border-radius: 10px;">No WhatsApp groups found. Click "Refresh Groups" or select from dropdown above once synced.</div>';
+        return;
+      }
+
+      container.innerHTML = groups.map(function(g) {
+        var isSelected = g.id === activeGroupId;
+        if (isSelected) {
+          var nameTextEl = document.getElementById('activeGroupNameText');
+          var btnConfirmEl = document.getElementById('btnConfirmGroup');
+          if (nameTextEl) nameTextEl.innerText = g.name;
+          if (btnConfirmEl) btnConfirmEl.disabled = false;
+        }
+
+        var initials = (g.name || 'GP').substring(0, 2).toUpperCase();
+        var activeBadge = isSelected ? '<span class="badge-active">ACTIVE</span>' : '';
+        return '<div class="group-card ' + (isSelected ? 'selected' : '') + '" data-group-id="' + escapeHtml(g.id) + '">' +
+          activeBadge +
+          '<div class="group-avatar">' + initials + '</div>' +
+          '<div class="group-info">' +
+            '<div class="group-name">' + escapeHtml(g.name) + '</div>' +
+            '<div class="group-meta">' + (g.participantCount || 0) + ' members</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function onDropdownSelect(selectedId) {
+      if (!selectedId) return;
+      var g = allGroups.find(function(item) { return item.id === selectedId; });
+      if (g) {
+        selectGroup(g.id, g.name);
+      }
+    }
+
+    // Delegated click event for group list
+    var groupsListEl = document.getElementById('groupsList');
+    if (groupsListEl) {
+      groupsListEl.addEventListener('click', function(e) {
+        var card = e.target.closest('.group-card');
+        if (card && card.dataset.groupId) {
+          var gid = card.dataset.groupId;
+          var g = allGroups.find(function(item) { return item.id === gid; });
+          if (g) {
+            selectGroup(g.id, g.name);
+          }
+        }
+      });
+    }
+
+    function filterGroups() {
+      var query = document.getElementById('groupSearch').value.toLowerCase();
+      var filtered = allGroups.filter(function(g) { return (g.name || '').toLowerCase().includes(query); });
+      renderGroups(filtered);
+    }
+
+    async function selectGroup(id, name) {
+      activeGroupId = id;
+      var nameTextEl = document.getElementById('activeGroupNameText');
+      var btnConfirmEl = document.getElementById('btnConfirmGroup');
+      var dropdown = document.getElementById('groupDropdown');
+      
+      if (nameTextEl) nameTextEl.innerText = name;
+      if (btnConfirmEl) btnConfirmEl.disabled = false;
+      if (dropdown && dropdown.value !== id) dropdown.value = id;
+
+      renderGroups(allGroups);
+
+      try {
+        var res = await fetch('/api/config/group', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ groupId: id })
+        });
+        if (res.ok) {
+          logMsg('Active group set to: ' + name + ' (Saved to .env)');
+        }
+      } catch (e) {
+        logMsg('Error saving group: ' + e.message);
+      }
+    }
+
+    function switchStep(step) {
+      currentStep = step;
+      document.querySelectorAll('.step-card').forEach(function(c) { c.classList.remove('active'); });
+      document.querySelectorAll('.step-item').forEach(function(i) { i.classList.remove('active'); });
+
+      var targetCard = document.getElementById('cardStep' + step);
+      var targetNav = document.getElementById('navStep' + step);
+      if (targetCard) targetCard.classList.add('active');
+      if (targetNav) targetNav.classList.add('active');
+
+      if (step === 2) {
+        fetchGroups();
+      }
+    }
+
+    async function setManualOtp() {
+      var otpInput = document.getElementById('manualOtpInput');
+      if (!otpInput) return;
+      var otp = otpInput.value.trim();
+      if (!otp) return;
+      try {
+        var res = await fetch('/api/otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otp: otp })
+        });
+        if (res.ok) {
+          logMsg('Manual OTP set to: ' + otp);
+          otpInput.value = '';
+          pollStatus();
+        }
+      } catch (e) {
+        logMsg('Failed to set OTP: ' + e.message);
+      }
+    }
+
+    async function handleFetchReport(e) {
+      e.preventDefault();
+      var startDate = document.getElementById('startDate').value;
+      var endDate = document.getElementById('endDate').value;
+      var reportType = document.getElementById('reportType').value;
+      var marutiUsername = document.getElementById('marutiUsername').value;
+      var marutiPassword = document.getElementById('marutiPassword').value;
+      var btn = document.getElementById('btnFetchReport');
+
+      var webhookUrl = document.getElementById('sheetWebhookInput') ? document.getElementById('sheetWebhookInput').value.trim() : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Fetching Report...';
+      }
+      logMsg('Starting report generation (' + startDate + ' to ' + endDate + ')...');
+
+      try {
+        var res = await fetch('/api/fetch-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            startDate: startDate,
+            endDate: endDate,
+            reportType: reportType,
+            marutiUsername: marutiUsername,
+            marutiPassword: marutiPassword,
+            googleSheetWebhookUrl: webhookUrl
+          })
+        });
+        var data = await res.json();
+        
+        if (res.ok && data.status === 'success') {
+          logMsg('SUCCESS! Fetched ' + data.rows + ' rows of data.');
+          if (data.sheetStatus && data.sheetStatus.success) {
+            logMsg('✅ Data automatically patched to Google Sheet!');
+            var badge = document.getElementById('sheetSyncBadge');
+            if (badge) { badge.innerText = 'Patched ✅'; badge.style.color = '#10b981'; }
+          }
+          renderDataPreview(data.data, data.startDate, data.endDate);
+        } else {
+          logMsg('REPORT ERROR: ' + (data.error || data.message || 'Unknown error'));
+        }
+      } catch (err) {
+        logMsg('NETWORK ERROR: ' + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = '🚀 Fetch & Process Report';
+        }
+      }
+    }
+
+    var fetchedReportCache = null;
+
+    async function fetchSheetConfig() {
+      try {
+        var res = await fetch('/api/config/sheet');
+        var data = await res.json();
+        if (data.googleSheetWebhookUrl) {
+          var input = document.getElementById('sheetWebhookInput');
+          if (input && !input.value) input.value = data.googleSheetWebhookUrl;
+        }
+      } catch (e) {}
+    }
+
+    async function saveSheetWebhook() {
+      var url = document.getElementById('sheetWebhookInput').value.trim();
+      try {
+        var res = await fetch('/api/config/sheet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ googleSheetWebhookUrl: url })
+        });
+        if (res.ok) {
+          logMsg('Google Sheet Webhook URL saved successfully!');
+        }
+      } catch (e) {
+        logMsg('Failed to save Webhook URL: ' + e.message);
+      }
+    }
+
+    async function handleSendToSheet() {
+      var webhookUrl = document.getElementById('sheetWebhookInput').value.trim();
+      var btn = document.getElementById('btnSendToSheet');
+      var badge = document.getElementById('sheetSyncBadge');
+
+      if (!webhookUrl) {
+        alert('Please enter your Google Apps Script Webhook URL first.\n\nInstructions:\n1. Open Google Sheet > Extensions > Apps Script\n2. Deploy > New deployment > Web App\n3. Set Access to "Anyone"\n4. Copy Web App URL and paste it here.');
+        return;
+      }
+
+      if (!fetchedReportCache || !fetchedReportCache.data || fetchedReportCache.data.length === 0) {
+        alert('No fetched report data available to send. Please fetch report data first.');
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Syncing to Sheet...';
+      }
+      if (badge) {
+        badge.innerText = 'Syncing...';
+        badge.style.color = '#f59e0b';
+      }
+      logMsg('Patching ' + fetchedReportCache.data.length + ' rows to Google Sheet via Webhook...');
+
+      try {
+        var res = await fetch('/api/patch-to-sheet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            webhookUrl: webhookUrl,
+            data: fetchedReportCache.data,
+            startDate: fetchedReportCache.startDate,
+            endDate: fetchedReportCache.endDate
+          })
+        });
+        var data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          logMsg('✅ SUCCESS! Patched ' + fetchedReportCache.data.length + ' rows to Google Sheet.');
+          if (badge) {
+            badge.innerText = 'Patched ✅';
+            badge.style.color = '#10b981';
+          }
+        } else {
+          logMsg('SHEET PATCH ERROR: ' + (data.error || 'Failed to patch data to sheet'));
+          if (badge) {
+            badge.innerText = 'Failed ❌';
+            badge.style.color = '#ef4444';
+          }
+        }
+      } catch (e) {
+        logMsg('NETWORK ERROR during sheet patch: ' + e.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = '📊 Send Data to Google Sheet';
+        }
+      }
+    }
+
+    function renderDataPreview(rows, startDate, endDate) {
+      fetchedReportCache = { data: rows, startDate: startDate, endDate: endDate };
+      var sec = document.getElementById('dataPreviewSection');
+      var header = document.getElementById('previewHeader');
+      var range = document.getElementById('previewDateRange');
+      var thead = document.getElementById('previewTableHead');
+      var tbody = document.getElementById('previewTableBody');
+      var btnSheet = document.getElementById('btnSendToSheet');
+      var btnCsv = document.getElementById('btnExportCsv');
+
+      if (!rows || rows.length === 0) {
+        if (sec) sec.style.display = 'none';
+        return;
+      }
+
+      if (sec) sec.style.display = 'block';
+      if (header) header.innerText = 'Fetched Data Preview (' + rows.length + ' rows)';
+      if (range) range.innerText = 'Date range: ' + startDate + ' to ' + endDate;
+      if (btnSheet) btnSheet.disabled = false;
+      if (btnCsv) btnCsv.disabled = false;
+
+      var keys = Object.keys(rows[0]);
+      var headHtml = '<tr>' + keys.map(function(k) { return '<th style="padding: 8px 12px; border-bottom: 1px solid #334155;">' + escapeHtml(k) + '</th>'; }).join('') + '</tr>';
+      if (thead) thead.innerHTML = headHtml;
+
+      var bodyHtml = rows.slice(0, 50).map(function(r) {
+        return '<tr style="border-bottom: 1px solid #1e293b;">' + keys.map(function(k) {
+          var val = r[k] !== undefined && r[k] !== null ? String(r[k]) : '';
+          return '<td style="padding: 6px 12px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + escapeHtml(val) + '</td>';
+        }).join('') + '</tr>';
+      }).join('');
+
+      if (tbody) tbody.innerHTML = bodyHtml;
+    }
+
+    function exportToCsv() {
+      if (!fetchedReportCache || !fetchedReportCache.data || fetchedReportCache.data.length === 0) return;
+      var rows = fetchedReportCache.data;
+      var keys = Object.keys(rows[0]);
+      var csv = [keys.join(',')];
+
+      rows.forEach(function(r) {
+        var rowVals = keys.map(function(k) {
+          var val = r[k] !== undefined && r[k] !== null ? String(r[k]) : '';
+          return '"' + val.replace(/"/g, '""') + '"';
+        });
+        csv.push(rowVals.join(','));
+      });
+
+      var blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+      var url = window.URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'Party_Visit_Report_' + (fetchedReportCache.startDate || 'data') + '.csv');
+      a.click();
+    }
+
+    async function handleLogout() {
+      if (!confirm('Are you sure you want to unlink WhatsApp and scan a new QR code?')) return;
+      try {
+        logMsg('Resetting WhatsApp session...');
+        autoAdvanced = false;
+        var res = await fetch('/api/logout', { method: 'POST' });
+        if (res.ok) {
+          logMsg('Session reset. Generating new QR code...');
+          switchStep(1);
+          var loading = document.getElementById('qrLoading');
+          var img = document.getElementById('qrImg');
+          if (loading) loading.style.display = 'flex';
+          if (img) img.style.display = 'none';
+          pollStatus();
+        }
+      } catch (e) {
+        logMsg('Error resetting session: ' + e.message);
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    setInterval(pollStatus, 2000);
+    pollStatus();
+    fetchSheetConfig();
+
+    async function saveSchedule() {
+      var time = document.getElementById('scheduleTime').value;
+      if (!time) {
+        alert('Please select a time.');
+        return;
+      }
+      var startDate = document.getElementById('startDate').value;
+      var endDate = document.getElementById('endDate').value;
+      var reportType = document.getElementById('reportType').value;
+      var marutiUsername = document.getElementById('marutiUsername').value;
+      var marutiPassword = document.getElementById('marutiPassword').value;
+      var webhookUrl = document.getElementById('sheetWebhookInput') ? document.getElementById('sheetWebhookInput').value.trim() : '';
+
+      try {
+        var res = await fetch('/api/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            time: time,
+            startDate: startDate,
+            endDate: endDate,
+            reportType: reportType,
+            marutiUsername: marutiUsername,
+            marutiPassword: marutiPassword,
+            googleSheetWebhookUrl: webhookUrl
+          })
+        });
+        var data = await res.json();
+        if (res.ok) {
+          var modalInner = document.querySelector('#scheduleModal > div');
+          var originalHTML = modalInner.innerHTML;
+          modalInner.innerHTML = '<div style="text-align: center; padding: 2rem 0;"><div style="font-size: 4rem; margin-bottom: 1rem;">✅</div><h3 style="margin-top: 0; color: #4ade80;">Successfully Scheduled!</h3><p style="color: var(--text-muted); font-size: 1.1rem;">Automation will trigger at ' + time + ' IST.</p></div>';
+          logMsg('Automation scheduled to run automatically at ' + time + ' IST.');
+          
+          var display = document.getElementById('scheduledTimeDisplay');
+          display.innerText = 'Scheduled: ' + time + ' IST';
+          display.style.display = 'inline-block';
+          document.getElementById('btnSchedule').innerText = '⏰ Edit Schedule';
+
+          setTimeout(function() {
+            document.getElementById('scheduleModal').style.display = 'none';
+            modalInner.innerHTML = originalHTML;
+          }, 2500);
+        } else {
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+      } catch (e) {
+        alert('Failed to schedule: ' + e.message);
+      }
+    }
+  </script>
+
+  <div id="scheduleModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: var(--bg-card); padding: 2rem; border-radius: 12px; max-width: 400px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <h3 style="margin-top: 0;">⏰ Schedule Automation</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Select the time (Indian Standard Time) when the automation should trigger automatically:</p>
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <input type="time" id="scheduleTime" class="form-control" required style="font-size: 1.2rem; padding: 0.75rem;">
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <button class="btn btn-primary" onclick="saveSchedule()">Save Schedule</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('scheduleModal').style.display = 'none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
