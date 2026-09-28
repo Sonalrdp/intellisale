@@ -2,7 +2,7 @@ services:
   - type: web
     name: maruti-dashboard
     env: node
-    buildCommand: npm install && npx puppeteer browsers install chrome
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD

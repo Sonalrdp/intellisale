@@ -1,6 +1,10 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+
+// Force puppeteer to use local cache directory for Render compatibility
+process.env.PUPPETEER_CACHE_DIR = path.join(__dirname, '.cache', 'puppeteer');
+
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const { LoadUtils } = require('whatsapp-web.js/src/util/Injected/Utils');
 const qrcode = require('qrcode');
